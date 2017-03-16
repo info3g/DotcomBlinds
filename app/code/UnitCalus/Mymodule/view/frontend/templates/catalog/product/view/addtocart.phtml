@@ -1,0 +1,598 @@
+<?php
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+/** @var $block \Magento\Catalog\Block\Product\View */
+?>
+
+<?php
+
+	
+  $_product = $block->getProduct(); 
+  
+$productid = $_product->getId();
+$tableName = 'catalog_product_option_title';
+ 
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+$connection = $resource->getConnection();
+
+$sqlall = "SELECT * FROM catalog_product_option where product_id = $productid";
+$AllData = $connection->fetchAll($sqlall);
+
+
+
+$Option_id = $AllData[0]['option_id'];
+
+$Titlesql1 = "SELECT * FROM catalog_product_option_title where option_id = $Option_id";
+$Titledata = $connection->fetchAll($Titlesql1);
+// Title
+$maintitle = $Titledata[0]['title'];
+
+//echo '<pre>'; print_r($Titledata); echo '</pre>';  
+
+
+
+  
+//echo '<pre>'; print_r($AllUnitsData); echo '</pre>'; */
+
+$UnitsData = "SELECT * FROM unit_price_table where product_id = $productid";
+$AllUnitsData = $connection->fetchAll($UnitsData);
+
+  
+//echo '<pre>'; print_r($AllUnitsData); echo '</pre>';
+
+
+?>
+
+
+<?php $_product = $block->getProduct(); ?>
+<?php $buttonTitle = __('Add to Cart'); ?>
+<?php if ($_product->isSaleable()): ?>
+<div class="box-tocart">
+    <div class="fieldset">
+        <?php if ($block->shouldRenderQuantity()): ?>
+       
+        <!-- Custom Input Field -->
+ <div>
+	<?php  //if ($this->getProduct()->getTypeId() == 'configurable') {	 ?>
+		 <h2><?php echo $maintitle ; ?></h2>
+
+		<img id="my_changing_image" src=""  width="200px"/>
+		</br>
+
+
+	<select name="options" id="my_select_box">
+		<?php foreach( $AllUnitsData as $AllUnitsDatas ){?>
+			<option id="<?php echo $AllUnitsDatas['id'];?>" value="<?php echo $AllUnitsDatas['id'];?>"><?php echo $AllUnitsDatas['title']; ?></option>
+		<?php } ?>	
+	</select></br>
+	
+	MM<input type="radio"  class="radiobut" name="myRadio" id="radio1" value="MM" /><br>
+	CM<input type="radio"  class="radiobut" name="myRadio" id="radio2" value="CM" /><br>
+	INCH<input type="radio"  class="radiobut" name="myRadio" id="radio3" value="INCH" /><br>
+	
+	
+    Width <input type="text" class="numbers" name="input2" id="input2"/>
+	<span class="InputSecnderrorMsg"></span><span class="InputSecndemptyerrorMsg"></span></br>
+	Drop<input type="text" class="numbers" name="input1" id="input1" />
+	<span class="InputFirsterrorMsg"></span><span class="InputFirstemptyerrorMsg"></span></br>
+	
+	<?php foreach( $AllUnitsData as $AllUnitsDatas ){?>
+	
+	
+	<input type="hidden" name="unit_type"  value="<?php echo $AllUnitsDatas['unit_type'];?>" class="unit_type_<?php echo $AllUnitsDatas['id'];?>" id="<?php echo $AllUnitsDatas['unit_type'];?>"  <?php if($AllUnitsDatas['unit_type']=='CM'){?> checked <?php } ?> >
+
+	
+	<input type="hidden" name="max_size" value="<?php echo $AllUnitsDatas['max_size'];?>" class="max_size_<?php echo $AllUnitsDatas['id'];?>" id="<?php echo $AllUnitsDatas['max_size'];?>" required>
+	
+	
+	<input type="hidden" name="min_size" value="<?php echo $AllUnitsDatas['min_size'];?>" class="min_size_<?php echo $AllUnitsDatas['id'];?>" id="<?php echo $AllUnitsDatas['min_size'];?>" >
+	<input type="hidden" name="price" value="<?php echo $AllUnitsDatas['price'];?>" class="price_<?php echo $AllUnitsDatas['id'];?>" id="<?php echo $AllUnitsDatas['price'];?>" >
+	<?php   }  ?>
+	
+</br>	
+	<div id="getResult">Get a Qoute</div>
+
+			Result <input type="text" class="numbers" name="result" id="result" value=""></br>
+			price per area<input type="text"  class="numbers" name="areaPrice" id="areaPrice" value="" readonly></br>
+
+			Converted value <input type="text" class="numbers" name="convertedvalue" 
+			id="convertedvalue" value="" readonly /></br>
+		
+		
+		Final Price <input type="text"  name="cloudways[remarks]" id="fullprice"  maxlength="255" placeholder="price"/>
+  </div>
+        <!-- Custom Input Field -->
+        <br>
+		
+		 <div class="field qty">
+            <label class="label" for="qty"><span><?php /* @escapeNotVerified */ echo __('Qty') ?></span></label>
+            <div class="control">
+                <input type="number"
+                       name="qty"
+                       id="qty"
+                       maxlength="12"
+                       value="<?php /* @escapeNotVerified */ echo $block->getProductDefaultQty() * 1 ?>"
+                       title="<?php /* @escapeNotVerified */ echo __('Qty') ?>" class="input-text qty"
+                       data-validate="<?php echo $block->escapeHtml(json_encode($block->getQuantityValidators())) ?>"
+                       />
+            </div>
+        </div>
+        <?php endif; ?>
+        <div class="actions">
+		
+            <button type="submit"
+                    title="<?php /* @escapeNotVerified */ echo $buttonTitle ?>"
+                    class="action primary tocart defaultAddtocart"
+                    id="product-addtocart-button">
+                <span><?php /* @escapeNotVerified */ echo $buttonTitle ?></span>
+            </button>
+			
+			<button type="submit"
+                    title="<?php /* @escapeNotVerified */ echo 'Sample Order'; ?>"
+                    class="action primary tocart sampleOrder"
+                    id="product-addtocart-button">
+                <span><?php /* @escapeNotVerified */ echo 'Sample Order'; ?></span>
+            </button>
+            <?php echo $block->getChildHtml('', true) ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+<?php 
+ $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+ $product = $objectManager->create('Magento\Catalog\Model\Product')->load($_product->getId());
+ $SampleAttribute_value = $product->getData('sample_yes');
+ // echo "<pre>";print_r($attribute_value);echo "</pre>";
+ ?>
+
+ 
+	<span class="InputFirsterrorMsg">
+<script type="text/x-magento-init">
+    {
+        "#product_addtocart_form": {
+            "Magento_Catalog/product/view/validation": {
+                "radioCheckboxClosest": ".nested"
+            }
+        }
+    }
+</script>
+<?php if (!$block->isRedirectToCartEnabled()) : ?>
+<script type="text/x-magento-init">
+    {
+        "#product_addtocart_form": {
+            "catalogAddToCart": {
+                "bindSubmit": false
+            }
+        }
+    }
+</script>
+<?php endif; ?>
+
+<script>
+var backend_unit = '';
+var max_vlaue = '';
+var min_value = '';
+require(['jquery'], function ($j) {
+	
+	var sampleValue = '<?php echo $SampleAttribute_value; ?>';
+	if(sampleValue == 1){
+		$j('.defaultAddtocart').prop("disabled",true);
+	    $j('.defaultAddtocart').attr('id','dummy12');
+		//$j('.sampleOrder').attr('id','validForm');
+		//$j('.sampleOrder').prop("disabled",true);
+	}else
+	{$j('.defaultAddtocart').prop("disabled",false);
+	    //$j('.defaultAddtocart').attr('id','validForm');
+		$j('.sampleOrder').attr('id','validForm');
+		$j('.sampleOrder').prop("disabled",true);
+		$j('.sampleOrder').attr('id','dummy123');
+		}
+	
+  
+      	var id = $j("#my_select_box option:selected").val();
+	//$j("#my_select_box option:first").attr("id");   
+	//alert(id);
+	var max_size = $j('.max_size_'+id).val();
+	var unit_type = $j('.unit_type_'+id).val();
+	var min_size  = $j('.min_size_'+id).val();
+	var price     = $j('.price_'+id).val();	
+	
+	
+	$j("#areaPrice").val(price);
+
+	
+	
+	if(unit_type=='MM'){
+	$j('#radio1').val('MM');
+	
+	//alert(unit_type);
+	$j("#radio1").attr('checked', 'checked');
+	}
+	
+	if(unit_type=='CM'){
+	$j('#radio2').val('CM');
+	//alert(unit_type);
+	$j("#radio2").attr('checked', 'checked');
+	}
+	
+	if(unit_type=='INCH'){
+	$j('#radio3').val('INCH');
+	//alert(unit_type);
+	$j("#radio3").attr('checked', 'checked');
+	}
+	
+	var placeholdeChange  = 'Min value  ' + min_size + ' to Max value   '+ max_size ;
+	$j('#input1').attr("placeholder", placeholdeChange);
+	$j('#input2').attr("placeholder", placeholdeChange);
+	
+	
+	
+//-----On chnge event------------------	
+$j('#my_select_box').change(function(){
+	//$('#my_changing_image').attr('src', $('#my_select_box').val());
+	var placeholdeChange='';
+	var id = this.value;
+	
+	var max_size = $j('.max_size_'+id).val();
+	/* if(radio)
+	{
+		var unit_type = $j('.radio'+id).val();
+	}else{
+		var unit_type = $j('.unit_type_'+id).val();
+	} */
+	var unit_type = $j('.unit_type_'+id).val();
+	var min_size  = $j('.min_size_'+id).val();
+	var price     = $j('.price_'+id).val();
+	
+	/// For global values
+	backend_unit = unit_type;
+	max_vlaue = max_size;
+	min_vlaue = min_size;
+		
+
+	if(unit_type=='MM'){
+	$j('#radio1').val("MM");
+	$j("#radio1").attr('checked', 'checked');
+	}
+	
+	if(unit_type=='CM'){
+	$j('#radio2').val('CM');
+	$j("#radio2").attr('checked', 'checked');
+	
+	}
+	
+	if(unit_type=='INCH'){
+	$j('#radio3').val('INCH');
+	$j("#radio3").attr('checked', 'checked');
+	}
+	
+	var placeholdeChange  = 'Min value  ' + min_size + ' to Max value   '+ max_size ;
+	$j('#input1').attr("placeholder", placeholdeChange);
+	$j('#input2').attr("placeholder", placeholdeChange);
+
+        
+});
+	
+	
+	//Min Max values 
+	
+	$j('#input1').keyup(function() {
+      var textValue1 = $j('#input1').val();
+	   //var comp = $('#maxValue').val();;
+	   
+	   if ((textValue1 > max_vlaue) || (textValue1 < min_vlaue) ) {
+		   alert('Max value to ' + max_vlaue + ' Min value to  '+ min_vlaue);
+			$j('.InputFirsterrorMsg').html('Min value  ' + min_size + ' to Max value   '+ max_size);
+			$j('#input1').val("");
+			} 
+			else { $j('.InputFirsterrorMsg').html(""); }
+  
+    });
+	
+	$j('#input2').keyup(function() {
+		   var textValue2 = $j('#input2').val();
+		   //var comp = $('#minValue').val();;
+		 // textValue1 > max_size && textValue1 < min_size
+		   if ((textValue2 > max_vlaue) || (textValue2 < min_vlaue)) {
+			   alert('Max value to ' + max_vlaue + ' Min value to  '+ min_vlaue);
+				$j('.InputSecnderrorMsg').html('Min value  ' + min_size + ' to Max value   '+ max_size);
+					$j('#input2').val("");
+				}
+					else { $j('.InputSecnderrorMsg').html(""); }				
+	});
+
+	$j("#radio1,#radio2,#radio3").click(function () {
+      $j('#input1,#input2,#convertedvalue,#fullprice,#result').val("");
+    });
+	
+	
+	
+$j('#getResult').on('click', function(){
+    var val1 = $j('#input1').val();
+    var val2 = $j('#input2').val();
+	var result = parseFloat(val1) * parseFloat(val2);
+	$j('#result').val(result);
+	
+	/* if($j('#input1').val()==""){
+		$j('.InputFirstemptyerrorMsg').html('Please Enter Value.');}
+		else{ $j('.InputFirstemptyerrorMsg').html('');}
+		
+		if($j('#input2').val()==""){
+		$j('.InputSecndemptyerrorMsg').html('Please Enter Value.');}
+		else{ $j('.InputSecndemptyerrorMsg').html('');} */
+	
+    var unit = $j("input[name='myRadio']:checked").val();
+     //$j('.radiobut').val();
+
+     //alert(unit);
+	
+  if(unit == 'CM')
+				   {
+				   
+				   alert('this is the area');
+				   var backend = backend_unit;
+							
+							alert('backend value '+backend);
+							//convert into inch
+							if(backend == 'MM')
+							{
+							
+							
+									var cm = $j('#result').val();
+									var inchs = 10;
+									alert('total '+cm);
+										
+									
+									var convertedresult = parseFloat(cm) * parseFloat(inchs);
+									alert('convert reult  '+convertedresult);
+									
+									$j('#convertedvalue').val(convertedresult);
+									
+									
+									var price =  $j('#areaPrice').val();
+									var finalprice =  parseFloat(convertedresult) * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+									
+									<!-- var convrt = convertedresult; -->
+									<!-- var pricss = $('#price').val(); -->
+									
+									<!-- var convertedresultq = parseFloat(convrt) * parseFloat(pricss); -->
+									
+									<!-- alert(convertedresultq); -->
+									
+									
+							
+							}
+							
+							if(backend == 'INCH')
+							{
+							
+							 
+									var cm = $j('#result').val();
+									var inchs = 2.54;
+									alert(cm);
+										
+									
+									var convertedresult = parseFloat(cm) / parseFloat(inchs);
+									alert(convertedresult);
+									
+									$j('#convertedvalue').val(convertedresult);
+									
+									
+									var price =  $j('#areaPrice').val();
+									var finalprice =  parseFloat(convertedresult) * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+									
+									<!-- var convrt = convertedresult; -->
+									<!-- var pricss = $('#price').val(); -->
+									
+									<!-- var convertedresultq = parseFloat(convrt) * parseFloat(pricss); -->
+									
+									<!-- alert(convertedresultq); -->
+									
+									
+							
+							}
+							
+							if(backend == 'CM')
+							{
+								
+								var cm = $j('#result').val();
+								
+							        var price =  $j('#areaPrice').val();
+									var finalprice =  cm * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+								
+							}
+							
+							
+				   
+				   }
+				   
+				   if(unit == 'MM')
+				   {
+				   
+				   alert('this is the area');
+				   
+							var backend = backend_unit;
+							alert(backend);
+							//convert into inch
+							if(backend == 'MM')
+							{
+							
+							
+										var cm = $j('#result').val();
+								
+							
+									
+									
+									var price =  $j('#areaPrice').val();
+									var finalprice =  cm * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+							
+							}
+							
+							if(backend == 'INCH')
+							{
+							
+							
+							 
+									var cm = $j('#result').val();
+									var inchs = 25.4;
+									alert(cm);
+										
+									
+									var convertedresult = parseFloat(cm) / parseFloat(inchs);
+									alert(convertedresult);
+									
+									$j('#convertedvalue').val(convertedresult);
+									
+									
+									var price =  $j('#areaPrice').val();
+									var finalprice =  parseFloat(convertedresult) * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+									
+									<!-- var convrt = convertedresult; -->
+									<!-- var pricss = $('#price').val(); -->
+									
+									<!-- var convertedresultq = parseFloat(convrt) * parseFloat(pricss); -->
+									
+									<!-- alert(convertedresultq); -->
+									
+									
+							
+							}
+							
+							if(backend == 'CM')
+							{ 
+								
+								var cm = $j('#result').val();
+									var inchs = 10;
+									alert(cm);
+										
+									
+									var convertedresult = parseFloat(cm) / parseFloat(inchs);
+									alert(convertedresult);
+									
+									$j('#convertedvalue').val(convertedresult);
+									
+									
+									var price =  $j('#areaPrice').val();
+									var finalprice =  parseFloat(convertedresult) * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+								
+							}
+							
+							
+				   
+				   }
+				   
+				   
+				   
+				    if(unit == 'INCH')	
+				   {
+				   
+				   alert('this is the area');
+				   
+							var backend = backend_unit;
+							alert(backend);
+							//convert into inch
+							if(backend == 'INCH')
+							{
+							
+							
+								    var cm = $j('#result').val();
+								    var price =  $j('#areaPrice').val();
+									var finalprice =  cm * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+							
+							}
+							
+							if(backend == 'CM')
+							{
+							
+							
+							 
+									var cm = $j('#result').val();
+									var inchs = 2.54;
+									alert(cm);
+										
+									
+									var convertedresult = parseFloat(cm) * parseFloat(inchs);
+									alert(convertedresult);
+									
+									$j('#convertedvalue').val(convertedresult);
+									
+									
+									var price =  $j('#areaPrice').val();
+									var finalprice =  parseFloat(convertedresult) * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+									
+									<!-- var convrt = convertedresult; -->
+									<!-- var pricss = $('#price').val(); -->
+									
+									<!-- var convertedresultq = parseFloat(convrt) * parseFloat(pricss); -->
+									
+									<!-- alert(convertedresultq); -->
+									
+									
+							
+							}
+							
+							if(backend == 'MM')
+							{ 
+								
+								var cm = $j('#result').val();
+									var inchs = 25.4;
+									alert(cm);
+										
+									
+									var convertedresult = parseFloat(cm) * parseFloat(inchs);
+									alert(convertedresult);
+									
+									$j('#convertedvalue').val(convertedresult);
+									
+									
+									var price =  $j('#areaPrice').val();
+									var finalprice =  parseFloat(convertedresult) * parseFloat(price);
+									$j('#fullprice').val(finalprice);
+									
+									
+								
+							}
+							
+							
+				   
+				   }
+			
+				   
+	 
+});
+
+     
+});
+
+</script>
+
+
